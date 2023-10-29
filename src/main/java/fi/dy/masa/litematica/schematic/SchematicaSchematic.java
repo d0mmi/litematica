@@ -393,7 +393,8 @@ public class SchematicaSchematic
     private void readEntitiesFromWorld(World world, BlockPos posStart, BlockPos size)
     {
         this.entities.clear();
-        List<Entity> entities = world.getOtherEntities(null, new net.minecraft.util.math.Box(posStart, posStart.add(size)), (e) -> (e instanceof PlayerEntity) == false);
+        BlockPos add = posStart.add(size);
+        List<Entity> entities = world.getOtherEntities(null, new net.minecraft.util.math.Box(new Vec3d(posStart.getX(),posStart.getY(),posStart.getZ()), new Vec3d(add.getX(),add.getY(),add.getZ())), (e) -> (e instanceof PlayerEntity) == false);
 
         for (Entity entity : entities)
         {

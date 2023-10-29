@@ -14,7 +14,6 @@ import net.minecraft.block.ChorusPlantBlock;
 import net.minecraft.block.DoorBlock;
 import net.minecraft.block.FenceBlock;
 import net.minecraft.block.FenceGateBlock;
-import net.minecraft.block.GourdBlock;
 import net.minecraft.block.HorizontalConnectingBlock;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.block.PaneBlock;
@@ -175,7 +174,7 @@ public class SchematicConversionFixers
     };
 
     public static final IStateFixer FIXER_CHRORUS_PLANT = (reader, state, pos) -> {
-        return ((ChorusPlantBlock) state.getBlock()).withConnectionProperties(reader, pos);
+        return ((ChorusPlantBlock) state.getBlock()).withConnectionProperties(reader, pos, state);
     };
 
     public static final IStateFixer FIXER_DIRT_SNOWY = (reader, state, pos) -> {
@@ -485,21 +484,6 @@ public class SchematicConversionFixers
     };
 
     public static final IStateFixer FIXER_STEM = (reader, state, pos) -> {
-        StemBlock stem = (StemBlock) state.getBlock();
-        GourdBlock crop = stem.getGourdBlock();
-
-        for (Direction side : fi.dy.masa.malilib.util.PositionUtils.HORIZONTAL_DIRECTIONS)
-        {
-            BlockPos posAdj = pos.offset(side);
-            BlockState stateAdj = reader.getBlockState(posAdj);
-            Block blockAdj = stateAdj.getBlock();
-
-            if (blockAdj == crop || (stem == Blocks.PUMPKIN_STEM && blockAdj == Blocks.CARVED_PUMPKIN))
-            {
-                return crop.getAttachedStem().getDefaultState().with(AttachedStemBlock.FACING, side);
-            }
-        }
-
         return state;
     };
 

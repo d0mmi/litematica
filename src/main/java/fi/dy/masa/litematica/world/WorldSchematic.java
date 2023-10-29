@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.world.tick.TickManager;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.Block;
@@ -59,6 +60,7 @@ public class WorldSchematic extends World
     @Nullable protected final WorldRendererSchematic worldRenderer;
     protected int nextEntityId;
     protected int entityCount;
+    private TickManager tickManager;
 
     public WorldSchematic(MutableWorldProperties properties,
                           RegistryEntry<DimensionType> dimension,
@@ -71,6 +73,7 @@ public class WorldSchematic extends World
         this.worldRenderer = worldRenderer;
         this.chunkManagerSchematic = new ChunkManagerSchematic(this);
         this.biome = this.mc.world.getRegistryManager().get(RegistryKeys.BIOME).entryOf(BiomeKeys.PLAINS);
+        this.tickManager = new TickManager();
     }
 
     public ChunkManagerSchematic getChunkProvider()
@@ -88,6 +91,11 @@ public class WorldSchematic extends World
     public QueryableTickScheduler<Block> getBlockTickScheduler()
     {
         return EmptyTickSchedulers.getClientTickScheduler();
+    }
+
+    @Override
+    public TickManager getTickManager() {
+        return this.tickManager;
     }
 
     @Override
