@@ -19,22 +19,21 @@ import fi.dy.masa.malilib.util.GuiUtils;
 public class RenderHandler implements IRenderer
 {
     @Override
-    public void onRenderWorldLast(MatrixStack matrices, Matrix4f projMatrix)
-    {
+    public void onRenderWorldLast(Matrix4f positionMatrix, Matrix4f projMatrix) {
         MinecraftClient mc = MinecraftClient.getInstance();
 
         if (Configs.Visuals.ENABLE_RENDERING.getBooleanValue() && mc.player != null)
         {
-            OverlayRenderer.getInstance().renderBoxes(matrices);
+            OverlayRenderer.getInstance().renderBoxes();
 
             if (Configs.InfoOverlays.VERIFIER_OVERLAY_ENABLED.getBooleanValue())
             {
-                OverlayRenderer.getInstance().renderSchematicVerifierMismatches(matrices);
+                OverlayRenderer.getInstance().renderSchematicVerifierMismatches();
             }
 
             if (DataManager.getToolMode() == ToolMode.REBUILD)
             {
-                OverlayRenderer.getInstance().renderSchematicRebuildTargetingOverlay(matrices);
+                OverlayRenderer.getInstance().renderSchematicRebuildTargetingOverlay();
             }
         }
     }

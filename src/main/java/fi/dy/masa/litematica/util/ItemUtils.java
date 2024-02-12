@@ -15,7 +15,9 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.BuiltinRegistries;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -128,7 +130,7 @@ public class ItemUtils
 
     public static ItemStack storeTEInStack(ItemStack stack, BlockEntity te)
     {
-        NbtCompound nbt = te.createNbtWithId();
+        NbtCompound nbt = te.createNbtWithId(CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup()));
 
         if (nbt.contains("Owner") && stack.getItem() instanceof BlockItem &&
             ((BlockItem) stack.getItem()).getBlock() instanceof AbstractSkullBlock)

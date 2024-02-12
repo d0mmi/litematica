@@ -16,14 +16,17 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.PlayerHeadItem;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.BuiltinRegistries;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
@@ -67,6 +70,7 @@ public class TaskPasteSchematicPerChunkCommand extends TaskPasteSchematicPerChun
     protected int maxCommandLength = 255;
     protected int sentFillCommands;
     protected int sentSetblockCommands;
+    private CommandRegistryAccess registryAccess;
 
     public TaskPasteSchematicPerChunkCommand(Collection<SchematicPlacement> placements,
                                              LayerRange range,
@@ -94,6 +98,7 @@ public class TaskPasteSchematicPerChunkCommand extends TaskPasteSchematicPerChun
         }
 
         this.processBoxEntitiesTask = this::processEntitiesInCurrentBox;
+        registryAccess = CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup());
     }
 
     @Override
@@ -447,7 +452,7 @@ public class TaskPasteSchematicPerChunkCommand extends TaskPasteSchematicPerChun
 
             try
             {
-                Set<String> keys = new HashSet<>(be.createNbt().getKeys());
+                Set<String> keys = new HashSet<>(be.createNbt(registryAccess).getKeys());
                 keys.remove("id");
                 keys.remove("x");
                 keys.remove("y");
@@ -486,7 +491,7 @@ public class TaskPasteSchematicPerChunkCommand extends TaskPasteSchematicPerChun
 
         if (be instanceof SignBlockEntity signBe)
         {
-            NbtCompound tag = be.createNbt();
+            NbtCompound tag = be.createNbt(registryAccess);
 
             if (tag != null)
             {
@@ -549,7 +554,7 @@ public class TaskPasteSchematicPerChunkCommand extends TaskPasteSchematicPerChun
     protected BlockPos placeNbtPickedBlock(BlockPos pos, BlockState state, BlockEntity be,
                                            World schematicWorld, ClientWorld clientWorld)
     {
-        double reach = this.mc.interactionManager.getReachDistance();
+        double reach = this.mc.player.getBlockInteractionRange();
         BlockPos placementPos = this.findEmptyNearbyPosition(clientWorld, this.mc.player.getPos(), 4, reach);
 
         if (placementPos != null && preparePickedStack(pos, state, be, schematicWorld, this.mc))
@@ -1003,7 +1008,7 @@ public class TaskPasteSchematicPerChunkCommand extends TaskPasteSchematicPerChun
 
     public static void addBlockEntityNbt(ItemStack stack, BlockEntity be)
     {
-        NbtCompound tag = be.createNbt();
+        NbtCompound tag = be.createNbt(CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup()));
 
         if (stack.getItem() instanceof PlayerHeadItem && tag.contains("SkullOwner"))
         {

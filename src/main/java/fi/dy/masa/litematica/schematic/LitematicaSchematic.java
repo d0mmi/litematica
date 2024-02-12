@@ -20,6 +20,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CarpetBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.AbstractDecorationEntity;
 import net.minecraft.fluid.Fluid;
@@ -31,10 +32,12 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtLongArray;
+import net.minecraft.registry.BuiltinRegistries;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryEntryLookup;
 import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -104,6 +107,7 @@ public class LitematicaSchematic
     private int totalBlocksReadFromWorld;
     @Nullable private final File schematicFile;
     private final FileType schematicType;
+    private CommandRegistryAccess registryAccess;
 
     private LitematicaSchematic(@Nullable File file)
     {
@@ -115,6 +119,7 @@ public class LitematicaSchematic
         this.schematicFile = file;
         this.schematicType = schematicType;
         this.converter = SchematicConverter.createForLitematica();
+        registryAccess = CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup());
     }
 
     @Nullable
@@ -461,7 +466,7 @@ public class LitematicaSchematic
 
                             try
                             {
-                                te.readNbt(teNBT);
+                                te.readNbt(teNBT, registryAccess);
 
                                 if (ignoreInventories && te instanceof Inventory)
                                 {
@@ -702,7 +707,7 @@ public class LitematicaSchematic
                             {
                                 // TODO Add a TileEntity NBT cache from the Chunk packets, to get the original synced data (too)
                                 BlockPos pos = new BlockPos(x, y, z);
-                                NbtCompound tag = te.createNbtWithId();
+                                NbtCompound tag = te.createNbtWithId(registryAccess);
                                 NBTUtils.writeBlockPosToTag(pos, tag);
                                 tileEntityMap.put(pos, tag);
                             }
@@ -946,7 +951,7 @@ public class LitematicaSchematic
                             {
                                 // TODO Add a TileEntity NBT cache from the Chunk packets, to get the original synced data (too)
                                 BlockPos pos = new BlockPos(x, y, z);
-                                NbtCompound tag = te.createNbtWithId();
+                                NbtCompound tag = te.createNbtWithId(registryAccess);
                                 NBTUtils.writeBlockPosToTag(pos, tag);
                                 tileEntityMap.put(pos, tag);
                             }

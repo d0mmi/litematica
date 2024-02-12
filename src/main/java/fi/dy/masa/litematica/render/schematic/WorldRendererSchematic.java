@@ -49,6 +49,7 @@ import fi.dy.masa.litematica.world.ChunkSchematic;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import fi.dy.masa.malilib.util.EntityUtils;
 import fi.dy.masa.malilib.util.LayerRange;
+import org.joml.Matrix4fStack;
 
 public class WorldRendererSchematic
 {
@@ -402,7 +403,7 @@ public class WorldRendererSchematic
         this.mc.getProfiler().pop();
     }
 
-    public int renderBlockLayer(RenderLayer renderLayer, MatrixStack matrices, Camera camera, Matrix4f projMatrix)
+    public int renderBlockLayer(RenderLayer renderLayer, Camera camera,Matrix4f posMatrix, Matrix4f projMatrix)
     {
         this.world.getProfiler().push("render_block_layer_" + renderLayer.toString());
 
@@ -462,7 +463,7 @@ public class WorldRendererSchematic
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
         }
 
-        initShader(shader, matrices, projMatrix);
+        initShader(shader,posMatrix, projMatrix);
         RenderSystem.setupShaderLights(shader);
         shader.bind();
 
@@ -518,17 +519,17 @@ public class WorldRendererSchematic
         return count;
     }
 
-    public void renderBlockOverlays(MatrixStack matrices, Camera camera, Matrix4f projMatrix)
+    public void renderBlockOverlays(Camera camera, Matrix4f posMatrix, Matrix4f projMatrix)
     {
-        this.renderBlockOverlay(OverlayRenderType.OUTLINE, matrices, camera, projMatrix);
-        this.renderBlockOverlay(OverlayRenderType.QUAD, matrices, camera, projMatrix);
+        this.renderBlockOverlay(OverlayRenderType.OUTLINE, camera, posMatrix, projMatrix);
+        this.renderBlockOverlay(OverlayRenderType.QUAD, camera, posMatrix, projMatrix);
     }
 
-    protected static void initShader(ShaderProgram shader, MatrixStack matrices, Matrix4f projMatrix)
+    protected static void initShader(ShaderProgram shader,Matrix4f posMatrix, Matrix4f projMatrix)
     {
         for (int i = 0; i < 12; ++i) shader.addSampler("Sampler" + i, RenderSystem.getShaderTexture(i));
 
-        if (shader.modelViewMat != null) shader.modelViewMat.set(matrices.peek().getPositionMatrix());
+        if (shader.modelViewMat != null) shader.modelViewMat.set(posMatrix);
         if (shader.projectionMat != null) shader.projectionMat.set(projMatrix);
         if (shader.colorModulator != null) shader.colorModulator.set(RenderSystem.getShaderColor());
         if (shader.fogStart != null) shader.fogStart.set(RenderSystem.getShaderFogStart());
@@ -538,7 +539,7 @@ public class WorldRendererSchematic
         if (shader.gameTime != null) shader.gameTime.set(RenderSystem.getShaderGameTime());
     }
 
-    protected void renderBlockOverlay(OverlayRenderType type, MatrixStack matrixStack, Camera camera, Matrix4f projMatrix)
+    protected void renderBlockOverlay(OverlayRenderType type, Camera camera,Matrix4f posMatrix, Matrix4f projMatrix)
     {
         RenderLayer renderLayer = RenderLayer.getTranslucent();
         renderLayer.startDrawing();
@@ -583,13 +584,13 @@ public class WorldRendererSchematic
                 {
                     VertexBuffer buffer = renderer.getOverlayVertexBuffer(type);
                     BlockPos chunkOrigin = renderer.getOrigin();
-
-                    matrixStack.push();
-                    matrixStack.translate(chunkOrigin.getX() - x, chunkOrigin.getY() - y, chunkOrigin.getZ() - z);
+                    Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
+                    matrixStack.pushMatrix();
+                    matrixStack.translate((float) (chunkOrigin.getX() - x), (float) (chunkOrigin.getY() - y), (float) (chunkOrigin.getZ() - z));
                     buffer.bind();
-                    buffer.draw(matrixStack.peek().getPositionMatrix(), projMatrix, shader);
+                    buffer.draw(posMatrix, projMatrix, shader);
                     VertexBuffer.unbind();
-                    matrixStack.pop();
+                    matrixStack.popMatrix();
                 }
             }
         }
@@ -642,8 +643,9 @@ public class WorldRendererSchematic
         return this.blockRenderManager.getModel(state);
     }
 
-    public void renderEntities(Camera camera, Frustum frustum, MatrixStack matrices, float partialTicks)
+    public void renderEntities(Camera camera, Frustum frustum, float partialTicks)
     {
+        MatrixStack matrices = new MatrixStack();
         if (this.renderEntitiesStartupCounter > 0)
         {
             --this.renderEntitiesStartupCounter;

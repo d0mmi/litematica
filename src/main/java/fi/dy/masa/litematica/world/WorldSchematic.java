@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.item.map.MapId;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.Block;
@@ -85,12 +86,6 @@ public class WorldSchematic extends World
     public ChunkManagerSchematic getChunkManager()
     {
         return this.chunkManagerSchematic;
-    }
-
-    @Override
-    public TickManager getTickManager()
-    {
-        return this.tickManager;
     }
 
     @Override
@@ -192,23 +187,21 @@ public class WorldSchematic extends World
         return this.mc.world != null ? this.mc.world.getTime() : 0;
     }
 
-    @Override
     @Nullable
-    public MapState getMapState(String id)
-    {
+    @Override
+    public MapState getMapState(MapId id) {
         return null;
     }
 
     @Override
-    public void putMapState(String name, MapState mapState)
-    {
+    public void putMapState(MapId id, MapState state) {
         // NO-OP
     }
 
     @Override
-    public int getNextMapId()
+    public MapId getNextMapId()
     {
-        return 0;
+        return new MapId(0);
     }
 
     @Override
@@ -418,9 +411,15 @@ public class WorldSchematic extends World
     }
 
     @Override
-    public void emitGameEvent(GameEvent event, Vec3d pos, @Nullable GameEvent.Emitter emitter)
+    public void emitGameEvent(RegistryEntry<GameEvent> event, Vec3d emitterPos, GameEvent.Emitter emitter)
     {
         // NO-OP
+    }
+
+    @Override
+    public TickManager getTickManager()
+    {
+        return tickManager;
     }
 
     @Override
@@ -431,12 +430,6 @@ public class WorldSchematic extends World
 
     @Override
     public void playSoundFromEntity(@javax.annotation.Nullable PlayerEntity except, Entity entity, RegistryEntry<SoundEvent> sound, SoundCategory category, float volume, float pitch, long seed)
-    {
-        // NO-OP
-    }
-
-    @Override
-    public void emitGameEvent(@Nullable Entity entity, GameEvent event, BlockPos pos)
     {
         // NO-OP
     }

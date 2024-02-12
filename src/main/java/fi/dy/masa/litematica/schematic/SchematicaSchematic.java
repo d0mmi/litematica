@@ -13,11 +13,14 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.enums.StructureBlockMode;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.BuiltinRegistries;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.util.BlockMirror;
@@ -53,10 +56,12 @@ public class SchematicaSchematic
     private String fileName;
     private IdentityHashMap<BlockState, IStateFixer> postProcessingFilter;
     private boolean needsConversionPostProcessing;
+    private CommandRegistryAccess registryAccess;
 
     private SchematicaSchematic()
     {
         this.converter = SchematicConverter.createForSchematica();
+        registryAccess = CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup());
     }
 
     public Vec3i getSize()
@@ -143,7 +148,7 @@ public class SchematicaSchematic
 
                                 try
                                 {
-                                    te.readNbt(teNBT);
+                                    te.readNbt(teNBT, registryAccess);
                                 }
                                 catch (Exception e)
                                 {
@@ -276,7 +281,7 @@ public class SchematicaSchematic
 
                                         try
                                         {
-                                            te.readNbt(teNBT);
+                                            te.readNbt(teNBT, registryAccess);
                                         }
                                         catch (Exception e)
                                         {
@@ -373,7 +378,7 @@ public class SchematicaSchematic
                     {
                         try
                         {
-                            NbtCompound nbt = te.createNbtWithId();
+                            NbtCompound nbt = te.createNbtWithId(registryAccess);
                             BlockPos pos = new BlockPos(relX, relY, relZ);
                             NBTUtils.writeBlockPosToTag(pos, nbt);
 

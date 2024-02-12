@@ -15,6 +15,8 @@ import net.minecraft.entity.decoration.painting.PaintingEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.BuiltinRegistries;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -247,7 +249,7 @@ public class SchematicPlacingUtils
 
                             try
                             {
-                                te.readNbt(teNBT);
+                                te.readNbt(teNBT, CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup()));
 
                                 if (ignoreInventories && te instanceof Inventory)
                                 {
